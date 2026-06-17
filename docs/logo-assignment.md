@@ -1,4 +1,4 @@
-# Project: Your Code Logo 🎨
+# Project: You, per p5.js 🎨
 
 ## What this is
 This project is your **personal logo** — a small p5.js sketch that shows the class who you
@@ -6,8 +6,8 @@ are. Using code, you'll put your name, a few pictures of things you care about, 
 personal motto on the screen. There's no single "right answer" here — the goal is to make
 something that looks like **you**.
 
-Along the way you'll get comfortable with two tools you'll use all year: the **`text()`**
-command and the **sketch tools** that help you draw.
+Along the way you'll get comfortable with two tools you'll use throughout your p5.js
+career: the **`text()`** command and the **sketch tools** that help you draw.
 
 ## What to make (three parts)
 
@@ -22,7 +22,11 @@ Put your name — the name you want to be called — on the canvas using the `te
   ```
   The two numbers are the **x and y position** — where the text goes on the canvas.
 
-### 2. Three to five pictures of you
+> 💡 **Teaser:** `text()` isn't only for letters — emoji work too, like
+> `text("🎸", 200, 200)`. (Notice the 🎨 in the tools panel? Same trick.) What else could
+> you fit inside `text()`?
+
+### 2. Three to five pictures that show us who you are
 Make **3–5 icons or small pictures** that show your passions, hobbies, and interests —
 things that tell us what you care about. Some ideas: a soccer ball, a music note, a
 mountain, a game controller, a pet, a favorite food.

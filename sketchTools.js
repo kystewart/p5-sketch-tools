@@ -185,7 +185,10 @@ function buildHud() {
   hud.style("z-index", "10");
 
   createDiv(
-    "<b>Sketch tools are ON.</b> (turn them off before you submit!)<br>" +
+    // The big 🎨 is a hook: an observant student notices emoji are just characters and
+    // wonders if they can use them too. (They can — text("🎨", x, y). See the assignment.)
+    "<span style='font-size:1.8rem;vertical-align:middle'>🎨</span> " +
+      "<b>Sketch tools are ON.</b> (turn them off before you submit!)<br>" +
       "Open your dev tools (<code>" + CONSOLE_HOTKEY + "</code>, or Tools ▸ Browser Tools) to see your code.<br><br>" +
       "Click the canvas to start and I'll duck out of your way — press <code>h</code> to bring me back.<br><br>" +
       "<b>keys:</b> c line/curve · Backspace undo · x clear · a arrays · h hide/show<br><br>" +
