@@ -58,6 +58,7 @@ let fillPicker, strokePicker; // p5 color pickers
 let fillNameInput, strokeNameInput; // text fields for naming each color
 let weightInput; // stroke-weight stepper (a number input)
 let noFillBox, noStrokeBox; // checkboxes
+let closeShapeBox, closeShapeRow; // "close shape" checkbox + its row (shown only for vertex shapes)
 
 // Where students see "open your console". The hotkey varies by browser/OS, so it lives
 // in ONE place you can edit. (Firefox: this opens the Browser Console.)
@@ -237,6 +238,10 @@ function buildHud() {
   weightInput.style("width", "60px");
   weightInput.input(updateConsole); // live as you spin the stepper
 
+  closeShapeBox = createCheckbox("close shape", false);
+  closeShapeBox.attribute("aria-label", "Close the shape with endShape(CLOSE)");
+  closeShapeBox.changed(updateConsole);
+
   const fillRow = hudRow(controls, "Fill");
   fillPicker.parent(fillRow);
   fillNameInput.parent(fillRow);
@@ -249,6 +254,9 @@ function buildHud() {
 
   const weightRow = hudRow(controls, "Weight");
   weightInput.parent(weightRow);
+
+  closeShapeRow = hudRow(controls, "Shape");
+  closeShapeBox.parent(closeShapeRow); // shown/hidden by updateConsole based on point count
 
   showHud();
 }
@@ -283,6 +291,12 @@ function toggleHud() {
 // ===== Console output =======================================================
 function updateConsole() {
   if (!toolsActive) return;
+
+  // the "close shape" control only applies to a vertex/curveVertex shape — show it then
+  if (closeShapeRow) {
+    closeShapeRow.style("display", outputIsShapeBlock() ? "flex" : "none");
+  }
+
   console.clear(); // tidy: complex line/curve shapes flood the log fast
 
   const label = sketchMode === "dots" ? "dots" : usingCurves ? "curves" : "lines";
@@ -298,6 +312,16 @@ function updateConsole() {
   }
 
   maybeNudge(); // name nudges should fire even before you've placed a point
+}
+
+// True when generateCode() will emit the function drawShape() { beginShape()… } form —
+// i.e. enough points for a vertex/curveVertex shape (not a point, line, triangle, or dot).
+function outputIsShapeBlock() {
+  if (showArrays || sketchMode === "dots") return false;
+  let n = clickedPoints.length;
+  if (n <= 2) return false;
+  if (n === 3 && !usingCurves) return false; // that's a triangle
+  return true;
 }
 
 // Build the lines of code for the current points. Returns a list of code lines.
@@ -373,7 +397,7 @@ function withStyle(usesFill, usesStroke, shapeLines) {
 // the braces, so nothing leaks into your sketch's scope when you paste it.
 function generateShapeBlock() {
   let lines = [];
-  lines.push("function drawShape() {  // rename me to match your picture, e.g. flowerPetals");
+  lines.push("function drawShape() {  // rename me to a VERB that says what it draws, e.g. drawFlowerPetals");
 
   // style goes inside the function (indented) so the named colors stay local
   let style = styleLines(true, true);
@@ -402,7 +426,11 @@ function generateShapeBlock() {
     lines.push("  curveVertex(" + pointAt(last) + ");  // control point");
   }
 
-  lines.push("  endShape();");
+  if (closeShapeBox && closeShapeBox.checked()) {
+    lines.push("  endShape(CLOSE);"); // CLOSE connects the last point back to the first
+  } else {
+    lines.push("  endShape();");
+  }
   lines.push("}");
   return lines;
 }

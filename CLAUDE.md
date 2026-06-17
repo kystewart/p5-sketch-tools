@@ -92,7 +92,8 @@ background, `rem` HUD font. *Still open:*
 Beginner-friendly JS: indexed `for` loops, `if/else`, `+` string concatenation, `let`,
 `===`, descriptive names (`clickedPoints`, never `px`). Avoid `.map` / arrow functions /
 spread in code a student might read (deep string-plumbing like `sanitizeName` is the
-allowed exception). Frame functions as **THE core CS skill** — lean into it.
+allowed exception). Frame functions as **THE core CS skill** — lean into it. Name functions
+with **verbs** that say what they do (`drawSun`, not `sun`), and say so often in comments/docs.
 
 ## How to verify changes
 - **Syntax, no browser:** macOS ships JavaScriptCore. Parse a file without running it via
