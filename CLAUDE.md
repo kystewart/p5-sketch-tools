@@ -56,13 +56,28 @@ room is written "for aspiring superusers." Live examples in the code:
 
 Keep that energy. Do not sand it into corporate-doc voice.
 
-**Accessibility / inclusion (non-negotiable).** Humor must NEVER target a student — not
-their choice, their vocabulary, or their ability. This has to work for English learners and
-SPED students. Point the joke at the absurd subject matter (real color names, the language,
-the tool itself) or use a "we're in on a secret together" wink that pulls the student in.
-Reframe any "you did it wrong" nudge as celebration + invitation. Prefer gentle console
-messages over blocking `alert`s (alerts interrupt and overwhelm); reserve `alert` for a
-genuine error the student must fix (e.g. an illegal variable name).
+**Inclusive tone (non-negotiable).** Humor must NEVER target a student — not their choice,
+their vocabulary, or their ability. Build for everyone by default (Universal Design): if a
+joke or interaction only works for the confident, fluent, mouse-using kid, it's broken.
+Point humor at the absurd subject matter (real color names, the language, the tool itself),
+never the learner. A "we're in on a secret" wink can pull students in — but mind its flip
+side: an inside joke also excludes whoever doesn't get the reference, and English idioms
+trip up English learners. Reframe any "you did it wrong" nudge as celebration + invitation.
+Prefer gentle console messages over blocking `alert`s (they interrupt and overwhelm);
+reserve `alert` for a genuine error the student must fix (e.g. an illegal variable name).
+
+**Known accessibility gaps (roadmap — be honest, don't overclaim).** *Done:* `lang`
+attribute, p5 `describe()` for the canvas, `aria-label`s on the HUD controls, opaque HUD
+background, `rem` HUD font. *Still open:*
+- **Keyboard / switch access:** placing points is mouse-only (`sketchToolsClicked` ←
+  `mouseClicked`). Needs an arrow-key cursor + Enter/Space to drop a point.
+- **Reduced motion:** the smear ignores `prefers-reduced-motion`; a reduced-motion path
+  (committed dots only, no live trail) collides with smear-as-pedagogy — a design call.
+- **Console as barrier:** the RTFE / console-first stance is dense, tiny, and English-only
+  — the biggest tension; it trades accessibility for a debugging habit.
+- **ELL idioms:** `colorTips` lean on English slang; consider plainer alternates.
+- **Color-blindness:** color is load-bearing. The named-variable + hex output helps (you
+  get a name and hex, not just a swatch), but the on-canvas preview still relies on sight.
 
 ## Code style (for student-readable files)
 Beginner-friendly JS: indexed `for` loops, `if/else`, `+` string concatenation, `let`,
