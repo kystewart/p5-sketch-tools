@@ -132,7 +132,8 @@ function drawSketchTools() {
       if (usingCurves) curveVertex(p.x, p.y);
       else vertex(p.x, p.y);
     }
-    if (!mouseIsOffCanvas()) {
+    // don't rubber-band the preview to the mouse when it's off-canvas or over the HUD
+    if (!mouseIsOffCanvas() && !mouseIsOverHud()) {
       if (usingCurves) {
         curveVertex(mouseX, mouseY);
         curveVertex(mouseX, mouseY); // control point
@@ -203,7 +204,7 @@ function buildHud() {
   fillNameInput.style("width", "92px");
   fillNameInput.changed(() => onNameChanged("fill"));
   noFillBox = createCheckbox("noFill", false);
-  noFillBox.changed(updateConsole);
+  noFillBox.changed(onNoFillToggled);
 
   strokePicker = createColorPicker("#1b1b3a");
   strokePicker.changed(updateConsole);
@@ -212,7 +213,7 @@ function buildHud() {
   strokeNameInput.style("width", "92px");
   strokeNameInput.changed(() => onNameChanged("stroke"));
   noStrokeBox = createCheckbox("noStroke", false);
-  noStrokeBox.changed(updateConsole);
+  noStrokeBox.changed(onNoStrokeToggled);
 
   weightInput = createInput("1", "number");
   weightInput.attribute("min", "1");
@@ -275,12 +276,12 @@ function updateConsole() {
 
   if (clickedPoints.length === 0) {
     console.log("Click the canvas to drop points.");
-    return;
+  } else {
+    // Log the whole snippet as ONE entry so you can copy it in a single click.
+    console.log("\n" + generateCode().join("\n"));
   }
 
-  // Log the whole snippet as ONE entry so you can copy it in a single click.
-  console.log("\n" + generateCode().join("\n"));
-  maybeNudge();
+  maybeNudge(); // name nudges should fire even before you've placed a point
 }
 
 // Build the lines of code for the current points. Returns a list of code lines.
@@ -418,6 +419,20 @@ function mouseIsOffCanvas() {
   return mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height;
 }
 
+// Is the mouse hovering the HUD panel? Kept separate from mouseIsOffCanvas (which is pure
+// p5 geometry) because this needs the DOM to know where the panel sits on screen.
+// winMouseX/winMouseY are p5's mouse position relative to the whole window.
+function mouseIsOverHud() {
+  if (!hud || !hudVisible) return false;
+  const box = hud.elt.getBoundingClientRect();
+  return (
+    winMouseX >= box.left &&
+    winMouseX <= box.right &&
+    winMouseY >= box.top &&
+    winMouseY <= box.bottom
+  );
+}
+
 function aTextFieldIsFocused() {
   const el = document.activeElement;
   return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
@@ -499,6 +514,30 @@ function onNameChanged(which) {
     input.value(clean);
     // The warning message obeys the rule it's teaching. (alert is plain JavaScript.)
     alert("pleaseUseCamelCaseForAllVariableNamesSinceSpacesAreIllegal\n\n→ using: " + clean);
+  }
+  updateConsole();
+}
+
+// Checking noFill / noStroke hides that color's picker + name box (they're irrelevant);
+// unchecking brings them back.
+function onNoFillToggled() {
+  if (noFillBox.checked()) {
+    fillPicker.hide();
+    fillNameInput.hide();
+  } else {
+    fillPicker.show();
+    fillNameInput.show();
+  }
+  updateConsole();
+}
+
+function onNoStrokeToggled() {
+  if (noStrokeBox.checked()) {
+    strokePicker.hide();
+    strokeNameInput.hide();
+  } else {
+    strokePicker.show();
+    strokeNameInput.show();
   }
   updateConsole();
 }
