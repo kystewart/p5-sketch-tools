@@ -71,6 +71,9 @@ attribute, p5 `describe()` for the canvas, `aria-label`s on the HUD controls, op
 background, `rem` HUD font. *Still open:*
 - **Keyboard / switch access:** placing points is mouse-only (`sketchToolsClicked` ←
   `mouseClicked`). Needs an arrow-key cursor + Enter/Space to drop a point.
+- **Touch / iPad:** input is mouse-only; touch devices need p5 `touchStarted` / pointer
+  events so tapping the canvas (and the HUD) works. Pairs with the keyboard item above as
+  "support input beyond a desktop mouse."
 - **Reduced motion:** the smear ignores `prefers-reduced-motion`; a reduced-motion path
   (committed dots only, no live trail) collides with smear-as-pedagogy — a design call.
 - **Console as barrier:** the RTFE / console-first stance is dense, tiny, and English-only
