@@ -14,6 +14,10 @@ controls. `gradient.js` has gradient helpers. `sketch.js` is the student's own f
   modules, or transpile step. This is exactly why the same files run on **CodeHS today**
   and a **self-hosted classroom static server later** with zero changes. Never add a
   dependency that needs a build.
+- **Target runtime = p5 1.11.x.** CodeHS forces a minimal `index.html` (just `p5.min.js`
+  1.11.13 + `sketchTools.js` + `sketch.js` — no `gradient.js`, no `<head>`/`lang`). Our own
+  `index.html` matches that p5 version and adds the a11y/`<head>` bits for local +
+  self-hosted use. Keep the code working on p5 1.11.x and test against it.
 - **p5-first, not raw JavaScript.** We teach p5 *because* it shields beginners from
   verbose JS. Use p5 idioms (`mouseClicked`, `keyPressed`, `mouseX`, `createColorPicker`…).
   Do **not** re-implement subsystems in raw DOM. Reach past p5 only at tiny, clearly
