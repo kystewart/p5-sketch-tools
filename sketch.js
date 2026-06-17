@@ -35,7 +35,7 @@ function draw() {
   // 2. YOUR PICTURES — trace shapes with the sketch tools, paste each one below as its
   //    OWN function. Functions DO things, so name them with a VERB that says what they
   //    draw (like drawFlowerPetals or drawSun). Then call the function here, e.g.:
-  drawBlackHoleSun();
+  drawBlackHoleSun(); // example call — delete me when you add your own
 
   // 3. YOUR MOTTO — a few words that matter to you right now
   // text("your motto here", 60, 560);
@@ -44,7 +44,9 @@ function draw() {
 }
 
 // Example shape function. The name is a VERB phrase — it says what it DOES. And look at
-// those color names: razzmatazz, orchid... not "purple"! 😉  Replace it with your own.
+// those color names: razzmatazz, orchid... not "purple"! 😉
+// It's intentionally UGLY — once you see how it works, delete this whole function (and its
+// call up in draw()) and make your own.
 function drawBlackHoleSun() {
   let razzmatazz = "#ac05f8";
   let midnight = "#373777";
