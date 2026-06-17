@@ -34,6 +34,8 @@ mountain, a game controller, a pet, a favorite food.
   for, and they make it much easier.
 - If a word says it better than a picture, you may use `text()` for **some** of them — but
   you must include **some drawings that you made yourself**, too.
+- When you paste a traced shape, give its function a **name that matches the picture**
+  (like `flowerPetals` or `sun`) instead of leaving it `drawShape`. Future-you will thank you.
 
 ### 3. Your motto
 Add a short **personal motto or mantra** — a few words that matter to you. Something you
