@@ -5,7 +5,8 @@ and get copy-pasteable p5 code in the browser console, with a floating HUD for f
 colors and stroke weight. Built for the classroom — works on CodeHS today and any static
 server later, with zero build step.
 
-🔗 https://github.com/kystewart/p5-sketch-tools
+### ▶ [Try it live](https://kystewart.github.io/p5-sketch-tools/)
+🔗 Repo: https://github.com/kystewart/p5-sketch-tools
 
 ## What's here
 - **`sketchTools.js`** — the toolkit (the "engine room"). Copy it into any p5 sketch.
