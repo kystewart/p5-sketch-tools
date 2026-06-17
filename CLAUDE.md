@@ -51,10 +51,18 @@ Casual, wry, a sly wink for the sharp kid — but crystal-clear for beginners. T
 room is written "for aspiring superusers." Live examples in the code:
 - "RTFE: Read the ___ Errors. You'll find them here."
 - "welcome to the engine room, mind the grease. (Claude was my editor.)"
-- "bold choice, Picasso." / "Same name for both? Maybe you want noStroke()."
+- color tips: "Psst — between us, 'papayawhip' is a real color. 🤫"
 - License footer: "stop electing lawyers… start electing makers."
 
 Keep that energy. Do not sand it into corporate-doc voice.
+
+**Accessibility / inclusion (non-negotiable).** Humor must NEVER target a student — not
+their choice, their vocabulary, or their ability. This has to work for English learners and
+SPED students. Point the joke at the absurd subject matter (real color names, the language,
+the tool itself) or use a "we're in on a secret together" wink that pulls the student in.
+Reframe any "you did it wrong" nudge as celebration + invitation. Prefer gentle console
+messages over blocking `alert`s (alerts interrupt and overwhelm); reserve `alert` for a
+genuine error the student must fix (e.g. an illegal variable name).
 
 ## Code style (for student-readable files)
 Beginner-friendly JS: indexed `for` loops, `if/else`, `+` string concatenation, `let`,
