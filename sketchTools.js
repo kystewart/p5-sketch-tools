@@ -521,7 +521,7 @@ function onNameChanged(which) {
   // louder ribbing: only the bare kindergarten colors, not fancy ones like lightSkyBlue
   const channelOff = which === "fill" ? noFillBox.checked() : noStrokeBox.checked();
   if (!channelOff && isKindergartenColor(clean)) {
-    alert('"' + clean + '"? Those are kindergarten colors. Don\'t you know any others?');
+    alert('"' + clean + '"? That\'s a kindergarten color. ' + random(kindergartenZingers));
   }
 
   updateConsole();
@@ -562,6 +562,19 @@ function maybeNudge() {
     console.log(`💡 Same name ("${fillName}") for fill and stroke? Maybe you want noStroke().`);
   }
 }
+
+// Each ribbing ends with a random one of these. Find where they're used, and figure out
+// HOW one gets picked — that's the sneaky lesson hiding in here. 😏
+const kindergartenZingers = [
+  "Don't you know any others?",
+  "Picasso you are not.",
+  "Sixteen million colors, and THIS is the pick?",
+  "The crayon box wants its imagination back.",
+  "Even MS Paint is embarrassed.",
+  "A toddler could've named that one.",
+  "Be brave — try a weird one.",
+  "Somewhere, a color wheel is weeping.",
+];
 
 // The bare kindergarten colors (ROYGBIV + the usual suspects). Case-insensitive and an
 // EXACT match — so fancy names like lightSkyBlue or dodgerBlue sail through unmocked.
