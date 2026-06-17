@@ -566,14 +566,14 @@ function maybeNudge() {
 // Each ribbing ends with a random one of these. Find where they're used, and figure out
 // HOW one gets picked — that's the sneaky lesson hiding in here. 😏
 const kindergartenZingers = [
-  "Don't you know any others?",
-  "Picasso you are not.",
-  "Sixteen million colors, and THIS is the pick?",
-  "The crayon box wants its imagination back.",
-  "Even MS Paint is embarrassed.",
-  "A toddler could've named that one.",
-  "Be brave — try a weird one.",
-  "Somewhere, a color wheel is weeping.",
+  "There's a whole rainbow out there — go explore!",
+  "Classic! Bet you can find a fancier one.",
+  "Nice and bold. Try a sneaky one next?",
+  "Great start — the picker has thousands more.",
+  "Ooh, a crowd favorite. Feeling adventurous?",
+  "Solid pick! Now find one nobody else will use.",
+  "Love it. Dare to get a little weird?",
+  "Try something fancy like cornflowerBlue and see. 👀",
 ];
 
 // The bare kindergarten colors (ROYGBIV + the usual suspects). Case-insensitive and an
