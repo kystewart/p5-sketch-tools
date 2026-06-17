@@ -44,7 +44,7 @@ function draw() {
 }
 
 // Example shape function. The name is a VERB phrase — it says what it DOES. And look at
-// those color names: razzmatazz, orchid... not "purple"! 😉
+// those color names: razzmatazz, midnight... not "purple" or "navy"! 😉
 // It's intentionally UGLY — once you see how it works, delete this whole function (and its
 // call up in draw()) and make your own.
 function drawBlackHoleSun() {
@@ -67,6 +67,8 @@ function drawBlackHoleSun() {
   vertex(492, 1);
   endShape(CLOSE);
 
-  fill("orchid");
+  // The sun itself: use the built-in circle() for a clean circle — way nicer than
+  // hand-tracing a lumpy one out of vertices. (And we reuse midnight from above!)
+  fill(midnight);
   circle(500, 100, 100);
 }
