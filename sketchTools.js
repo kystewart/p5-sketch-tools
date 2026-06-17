@@ -198,19 +198,21 @@ function buildHud() {
   controls.parent(hud);
 
   fillPicker = createColorPicker("#ff8c42");
-  fillPicker.changed(updateConsole);
+  fillPicker.input(updateConsole); // live: snippet updates as the color changes
   fillNameInput = createInput("");
   fillNameInput.attribute("placeholder", "fill name");
   fillNameInput.style("width", "92px");
-  fillNameInput.changed(() => onNameChanged("fill"));
+  fillNameInput.input(updateConsole); // live snippet as you type
+  fillNameInput.changed(() => onNameChanged("fill")); // on commit: clean up + ribbing
   noFillBox = createCheckbox("noFill", false);
   noFillBox.changed(onNoFillToggled);
 
   strokePicker = createColorPicker("#1b1b3a");
-  strokePicker.changed(updateConsole);
+  strokePicker.input(updateConsole);
   strokeNameInput = createInput("");
   strokeNameInput.attribute("placeholder", "stroke name");
   strokeNameInput.style("width", "92px");
+  strokeNameInput.input(updateConsole);
   strokeNameInput.changed(() => onNameChanged("stroke"));
   noStrokeBox = createCheckbox("noStroke", false);
   noStrokeBox.changed(onNoStrokeToggled);
@@ -219,7 +221,7 @@ function buildHud() {
   weightInput.attribute("min", "1");
   weightInput.attribute("step", "1");
   weightInput.style("width", "60px");
-  weightInput.changed(updateConsole);
+  weightInput.input(updateConsole); // live as you spin the stepper
 
   const fillRow = hudRow(controls, "Fill");
   fillPicker.parent(fillRow);
@@ -515,6 +517,13 @@ function onNameChanged(which) {
     // The warning message obeys the rule it's teaching. (alert is plain JavaScript.)
     alert("pleaseUseCamelCaseForAllVariableNamesSinceSpacesAreIllegal\n\n→ using: " + clean);
   }
+
+  // louder ribbing: only the bare kindergarten colors, not fancy ones like lightSkyBlue
+  const channelOff = which === "fill" ? noFillBox.checked() : noStrokeBox.checked();
+  if (!channelOff && isKindergartenColor(clean)) {
+    alert('"' + clean + '"? Those are kindergarten colors. Don\'t you know any others?');
+  }
+
   updateConsole();
 }
 
@@ -542,29 +551,24 @@ function onNoStrokeToggled() {
   updateConsole();
 }
 
-// Gentle ribbing printed under the snippet — fires in EVERY mode, because a boring color
-// name is a boring color name no matter what you're drawing.
+// Gentle ribbing printed under the snippet. (The louder kindergarten-color alert lives in
+// onNameChanged; this just whispers the same-name tip.)
 function maybeNudge() {
   if (!fillPicker) return; // HUD not built (tools off)
 
   const fillName = colorVarName("fill");
   const strokeName = colorVarName("stroke");
-  const noFillOn = noFillBox.checked();
-  const noStrokeOn = noStrokeBox.checked();
-
-  if (!noFillOn && !noStrokeOn && fillName === strokeName) {
+  if (!noFillBox.checked() && !noStrokeBox.checked() && fillName === strokeName) {
     console.log(`💡 Same name ("${fillName}") for fill and stroke? Maybe you want noStroke().`);
   }
+}
 
-  // kindergarten colors: ROYGBIV plus the usual suspects
+// The bare kindergarten colors (ROYGBIV + the usual suspects). Case-insensitive and an
+// EXACT match — so fancy names like lightSkyBlue or dodgerBlue sail through unmocked.
+function isKindergartenColor(name) {
   const kindergarten = [
     "red", "orange", "yellow", "green", "blue", "indigo", "violet",
     "purple", "pink", "brown", "black", "white", "gray", "grey",
   ];
-  if (!noFillOn && kindergarten.includes(fillName.toLowerCase())) {
-    console.log(`🙄 "${fillName}"? Those are kindergarten colors. Don't you know any others?`);
-  }
-  if (!noStrokeOn && kindergarten.includes(strokeName.toLowerCase())) {
-    console.log(`🙄 "${strokeName}"? Those are kindergarten colors. Don't you know any others?`);
-  }
+  return kindergarten.includes(name.toLowerCase());
 }
