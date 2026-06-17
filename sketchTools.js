@@ -542,9 +542,11 @@ function onNoStrokeToggled() {
   updateConsole();
 }
 
-// Gentle ribbing printed under the snippet.
+// Gentle ribbing printed under the snippet — fires in EVERY mode, because a boring color
+// name is a boring color name no matter what you're drawing.
 function maybeNudge() {
-  if (showArrays || sketchMode === "dots" || !fillPicker) return;
+  if (!fillPicker) return; // HUD not built (tools off)
+
   const fillName = colorVarName("fill");
   const strokeName = colorVarName("stroke");
   const noFillOn = noFillBox.checked();
@@ -553,9 +555,16 @@ function maybeNudge() {
   if (!noFillOn && !noStrokeOn && fillName === strokeName) {
     console.log(`💡 Same name ("${fillName}") for fill and stroke? Maybe you want noStroke().`);
   }
-  const boring = ["red", "green", "blue", "black", "white"];
-  if (!noFillOn && boring.includes(fillName.toLowerCase()))
-    console.log(`🙄 "${fillName}"? Bold choice, Picasso.`);
-  if (!noStrokeOn && boring.includes(strokeName.toLowerCase()))
-    console.log(`🙄 "${strokeName}"? Living dangerously, I see.`);
+
+  // kindergarten colors: ROYGBIV plus the usual suspects
+  const kindergarten = [
+    "red", "orange", "yellow", "green", "blue", "indigo", "violet",
+    "purple", "pink", "brown", "black", "white", "gray", "grey",
+  ];
+  if (!noFillOn && kindergarten.includes(fillName.toLowerCase())) {
+    console.log(`🙄 "${fillName}"? Those are kindergarten colors. Don't you know any others?`);
+  }
+  if (!noStrokeOn && kindergarten.includes(strokeName.toLowerCase())) {
+    console.log(`🙄 "${strokeName}"? Those are kindergarten colors. Don't you know any others?`);
+  }
 }
