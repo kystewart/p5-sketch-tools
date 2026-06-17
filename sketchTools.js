@@ -24,6 +24,11 @@ let toolsActive = false; // is the kit turned on? (false = everything below no-o
 let hud; // the HUD panel (a p5 DOM element), built on demand
 let hudVisible = false; // is the HUD showing right now?
 
+let fillPicker, strokePicker; // p5 color pickers
+let fillNameInput, strokeNameInput; // text fields for naming each color
+let weightInput; // stroke-weight stepper (a number input)
+let noFillBox, noStrokeBox; // checkboxes
+
 // Where students see "open your console". The hotkey varies by browser/OS, so it lives
 // in ONE place you can edit. (Firefox: this opens the Browser Console.)
 const CONSOLE_HOTKEY = "Ctrl/Cmd + Shift + J";
@@ -86,9 +91,7 @@ function drawSketchTools() {
   if (!toolsActive) return;
 
   push();
-  stroke("black");
-  strokeWeight(1);
-  noFill();
+  applyCurrentStyle(); // draw the preview in the colors/weight you picked in the HUD
 
   if (sketchMode === "dots") {
     for (const p of clickedPoints) circle(p.x, p.y, 5);
@@ -113,11 +116,14 @@ function drawSketchTools() {
     endShape();
   }
 
-  // mark each clicked point
-  for (const p of clickedPoints) {
-    stroke("white");
-    fill("black");
-    circle(p.x, p.y, 5);
+  // mark each clicked point (skip in dots mode — the styled circles already show them)
+  if (sketchMode !== "dots") {
+    for (const p of clickedPoints) {
+      stroke("white");
+      fill("black");
+      strokeWeight(1);
+      circle(p.x, p.y, 5);
+    }
   }
   pop();
 }
@@ -151,6 +157,50 @@ function buildHud() {
       "<i>Notice there's no background() yet — that's why it smears. Add one in draw() " +
       "when you're done playing.</i>"
   ).parent(hud);
+
+  // --- interactive controls (the only clickable bits) ---
+  const controls = createDiv();
+  controls.style("margin-top", "10px");
+  controls.style("padding-top", "8px");
+  controls.style("border-top", "1px solid rgba(255,255,255,0.2)");
+  controls.parent(hud);
+
+  fillPicker = createColorPicker("#ff8c42");
+  fillPicker.changed(updateConsole);
+  fillNameInput = createInput("");
+  fillNameInput.attribute("placeholder", "fill name");
+  fillNameInput.style("width", "92px");
+  fillNameInput.changed(() => onNameChanged("fill"));
+  noFillBox = createCheckbox("noFill", false);
+  noFillBox.changed(updateConsole);
+
+  strokePicker = createColorPicker("#1b1b3a");
+  strokePicker.changed(updateConsole);
+  strokeNameInput = createInput("");
+  strokeNameInput.attribute("placeholder", "stroke name");
+  strokeNameInput.style("width", "92px");
+  strokeNameInput.changed(() => onNameChanged("stroke"));
+  noStrokeBox = createCheckbox("noStroke", false);
+  noStrokeBox.changed(updateConsole);
+
+  weightInput = createInput("1", "number");
+  weightInput.attribute("min", "1");
+  weightInput.attribute("step", "1");
+  weightInput.style("width", "60px");
+  weightInput.changed(updateConsole);
+
+  const fillRow = hudRow(controls, "Fill");
+  fillPicker.parent(fillRow);
+  fillNameInput.parent(fillRow);
+  noFillBox.parent(fillRow);
+
+  const strokeRow = hudRow(controls, "Stroke");
+  strokePicker.parent(strokeRow);
+  strokeNameInput.parent(strokeRow);
+  noStrokeBox.parent(strokeRow);
+
+  const weightRow = hudRow(controls, "Weight");
+  weightInput.parent(weightRow);
 
   showHud();
 }
@@ -199,18 +249,53 @@ function updateConsole() {
 
   // Log the whole snippet as ONE entry so you can copy it in a single click.
   console.log("\n" + generateCode().join("\n"));
+  maybeNudge();
 }
 
 // Build the lines of code for the current points. Returns an array of strings.
 function generateCode() {
-  if (sketchMode === "dots") return clickedPoints.map((p) => `circle(${p.x}, ${p.y}, 5);`);
+  // arrays mode feeds the gradient functions — colors don't apply there
   if (showArrays) return generateArrays();
+  if (sketchMode === "dots")
+    return withStyle(true, true, clickedPoints.map((p) => `circle(${p.x}, ${p.y}, 5);`));
 
   const n = clickedPoints.length;
-  if (n === 1) return [`point(${pointAt(0)});   // (${pointAt(0)})`];
-  if (n === 2) return [`line(${pointAt(0)}, ${pointAt(1)});`];
-  if (n === 3 && !usingCurves) return [`triangle(${pointAt(0)}, ${pointAt(1)}, ${pointAt(2)});`];
-  return generateShapeBlock();
+  if (n === 1) return withStyle(false, true, [`point(${pointAt(0)});`]);
+  if (n === 2) return withStyle(false, true, [`line(${pointAt(0)}, ${pointAt(1)});`]);
+  if (n === 3 && !usingCurves)
+    return withStyle(true, true, [`triangle(${pointAt(0)}, ${pointAt(1)}, ${pointAt(2)});`]);
+  return withStyle(true, true, generateShapeBlock());
+}
+
+// Prepend named-color fill/stroke/strokeWeight lines to a shape snippet.
+// usesFill/usesStroke say which styles the shape actually cares about (a line has no fill).
+function withStyle(usesFill, usesStroke, shapeLines) {
+  if (!fillPicker || !strokePicker) return shapeLines; // HUD not built (tools off)
+
+  const declarations = [];
+  const calls = [];
+  if (usesFill) {
+    if (noFillBox.checked()) {
+      calls.push("noFill();");
+    } else {
+      const name = colorVarName("fill");
+      declarations.push(`let ${name} = "${fillPicker.value()}";`);
+      calls.push(`fill(${name});`);
+    }
+  }
+  if (usesStroke) {
+    if (noStrokeBox.checked()) {
+      calls.push("noStroke();");
+    } else {
+      const name = colorVarName("stroke");
+      declarations.push(`let ${name} = "${strokePicker.value()}";`);
+      calls.push(`stroke(${name});`);
+      calls.push(`strokeWeight(${currentWeight()});`);
+    }
+  }
+  const header = declarations.concat(calls);
+  if (header.length > 0) header.push(""); // blank line between style and shape
+  return header.concat(shapeLines);
 }
 
 function generateShapeBlock() {
@@ -248,4 +333,96 @@ function mouseIsOffCanvas() {
 function aTextFieldIsFocused() {
   const el = document.activeElement;
   return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
+}
+
+// ===== HUD/control helpers ==================================================
+// One labeled row of controls inside the HUD.
+function hudRow(parent, labelText) {
+  const row = createDiv();
+  row.style("display", "flex");
+  row.style("align-items", "center");
+  row.style("gap", "8px");
+  row.style("margin-top", "8px");
+  if (labelText) {
+    const label = createSpan(labelText);
+    label.parent(row);
+    label.style("min-width", "48px");
+  }
+  row.parent(parent);
+  return row;
+}
+
+// Paint the preview in the styles currently chosen in the HUD.
+function applyCurrentStyle() {
+  if (noStrokeBox && noStrokeBox.checked()) {
+    noStroke();
+  } else {
+    stroke(strokePicker ? strokePicker.value() : "black");
+    strokeWeight(currentWeight());
+  }
+  if (noFillBox && noFillBox.checked()) {
+    noFill();
+  } else {
+    fill(fillPicker ? fillPicker.value() : "black");
+  }
+}
+
+function currentWeight() {
+  const w = weightInput ? parseInt(weightInput.value(), 10) : 1;
+  return isNaN(w) || w < 1 ? 1 : w; // clamp: a number box happily accepts junk
+}
+
+// Read a color-name field and turn it into a safe variable name for the code.
+function colorVarName(which) {
+  const input = which === "fill" ? fillNameInput : strokeNameInput;
+  const fallback = which === "fill" ? "fillColor" : "strokeColor";
+  return sanitizeName(input ? input.value() : "", fallback);
+}
+
+// Make a legal JavaScript variable name out of whatever the student typed.
+function sanitizeName(raw, fallback) {
+  let s = (raw || "").replace(/[^a-zA-Z0-9 ]/g, " "); // illegal chars -> spaces
+  const words = s.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return fallback;
+  let name =
+    words[0].toLowerCase() +
+    words.slice(1).map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+  name = name.replace(/^[0-9]+/, ""); // names can't start with a digit
+  if (name === "") return fallback;
+  // don't let them shadow the p5 functions we're about to call
+  const reserved = ["fill", "stroke", "strokeWeight", "noFill", "noStroke", "color"];
+  if (reserved.includes(name)) name = "my" + name[0].toUpperCase() + name.slice(1);
+  return name;
+}
+
+// When a name field loses focus, clean it up — and pop a (self-demonstrating) warning.
+function onNameChanged(which) {
+  const input = which === "fill" ? fillNameInput : strokeNameInput;
+  const fallback = which === "fill" ? "fillColor" : "strokeColor";
+  const raw = input.value().trim();
+  const clean = sanitizeName(raw, fallback);
+  if (raw !== "" && clean !== raw) {
+    input.value(clean);
+    // The warning message obeys the rule it's teaching. (alert is plain JavaScript.)
+    alert("pleaseUseCamelCaseForAllVariableNamesSinceSpacesAreIllegal\n\n→ using: " + clean);
+  }
+  updateConsole();
+}
+
+// Gentle ribbing printed under the snippet.
+function maybeNudge() {
+  if (showArrays || sketchMode === "dots" || !fillPicker) return;
+  const fillName = colorVarName("fill");
+  const strokeName = colorVarName("stroke");
+  const noFillOn = noFillBox.checked();
+  const noStrokeOn = noStrokeBox.checked();
+
+  if (!noFillOn && !noStrokeOn && fillName === strokeName) {
+    console.log(`💡 Same name ("${fillName}") for fill and stroke? Maybe you want noStroke().`);
+  }
+  const boring = ["red", "green", "blue", "black", "white"];
+  if (!noFillOn && boring.includes(fillName.toLowerCase()))
+    console.log(`🙄 "${fillName}"? Bold choice, Picasso.`);
+  if (!noStrokeOn && boring.includes(strokeName.toLowerCase()))
+    console.log(`🙄 "${strokeName}"? Living dangerously, I see.`);
 }
