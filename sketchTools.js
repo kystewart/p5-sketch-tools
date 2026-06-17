@@ -11,11 +11,11 @@
  *
  * HOW IT'S WIRED (the lesson): p5 calls mouseClicked()/keyPressed()/draw() in sketch.js,
  * and those hand off to the sketchTools* functions down below. That's just functions
- * calling functions — the whole point of this week.
+ * calling functions — functions are perhaps THE core CS skill.
  */
 
 // ===== State ================================================================
-let clickedPoints = []; // each item is a point: { x, y }
+let clickedPoints = []; // an array of point objects like { x: 40, y: 90 } (little structs)
 let sketchMode = "lines"; // "lines" | "curves" | "dots"
 let usingCurves = false; // connect points with curveVertex instead of vertex?
 let showArrays = false; // print x[]/y[] arrays instead of a shape? (great for gradients)
@@ -252,73 +252,130 @@ function updateConsole() {
   maybeNudge();
 }
 
-// Build the lines of code for the current points. Returns an array of strings.
+// Build the lines of code for the current points. Returns a list of code lines.
 function generateCode() {
   // arrays mode feeds the gradient functions — colors don't apply there
   if (showArrays) return generateArrays();
-  if (sketchMode === "dots")
-    return withStyle(true, true, clickedPoints.map((p) => `circle(${p.x}, ${p.y}, 5);`));
 
-  const n = clickedPoints.length;
-  if (n === 1) return withStyle(false, true, [`point(${pointAt(0)});`]);
-  if (n === 2) return withStyle(false, true, [`line(${pointAt(0)}, ${pointAt(1)});`]);
-  if (n === 3 && !usingCurves)
-    return withStyle(true, true, [`triangle(${pointAt(0)}, ${pointAt(1)}, ${pointAt(2)});`]);
+  if (sketchMode === "dots") {
+    let lines = [];
+    for (let i = 0; i < clickedPoints.length; i++) {
+      lines.push("circle(" + pointAt(i) + ", 5);");
+    }
+    return withStyle(true, true, lines);
+  }
+
+  let count = clickedPoints.length;
+  if (count === 1) {
+    return withStyle(false, true, ["point(" + pointAt(0) + ");"]);
+  }
+  if (count === 2) {
+    return withStyle(false, true, ["line(" + pointAt(0) + ", " + pointAt(1) + ");"]);
+  }
+  if (count === 3 && !usingCurves) {
+    return withStyle(true, true, ["triangle(" + pointAt(0) + ", " + pointAt(1) + ", " + pointAt(2) + ");"]);
+  }
   return withStyle(true, true, generateShapeBlock());
 }
 
-// Prepend named-color fill/stroke/strokeWeight lines to a shape snippet.
-// usesFill/usesStroke say which styles the shape actually cares about (a line has no fill).
+// Add the fill/stroke/strokeWeight lines (using your named colors) above a shape.
+// usesFill / usesStroke say which styles the shape cares about (a line has no fill).
 function withStyle(usesFill, usesStroke, shapeLines) {
   if (!fillPicker || !strokePicker) return shapeLines; // HUD not built (tools off)
 
-  const declarations = [];
-  const calls = [];
+  let fillName = colorVarName("fill");
+  let strokeName = colorVarName("stroke");
+  let lines = [];
+
+  // declare the color variables first — this is exactly why naming them matters
+  if (usesFill && !noFillBox.checked()) {
+    lines.push("let " + fillName + ' = "' + fillPicker.value() + '";');
+  }
+  if (usesStroke && !noStrokeBox.checked()) {
+    lines.push("let " + strokeName + ' = "' + strokePicker.value() + '";');
+  }
+
+  // then turn the styles on
   if (usesFill) {
-    if (noFillBox.checked()) {
-      calls.push("noFill();");
-    } else {
-      const name = colorVarName("fill");
-      declarations.push(`let ${name} = "${fillPicker.value()}";`);
-      calls.push(`fill(${name});`);
-    }
+    if (noFillBox.checked()) lines.push("noFill();");
+    else lines.push("fill(" + fillName + ");");
   }
   if (usesStroke) {
     if (noStrokeBox.checked()) {
-      calls.push("noStroke();");
+      lines.push("noStroke();");
     } else {
-      const name = colorVarName("stroke");
-      declarations.push(`let ${name} = "${strokePicker.value()}";`);
-      calls.push(`stroke(${name});`);
-      calls.push(`strokeWeight(${currentWeight()});`);
+      lines.push("stroke(" + strokeName + ");");
+      lines.push("strokeWeight(" + currentWeight() + ");");
     }
   }
-  const header = declarations.concat(calls);
-  if (header.length > 0) header.push(""); // blank line between style and shape
-  return header.concat(shapeLines);
+
+  if (lines.length > 0) lines.push(""); // blank line before the shape
+
+  // finally, add the shape itself
+  for (let i = 0; i < shapeLines.length; i++) {
+    lines.push(shapeLines[i]);
+  }
+  return lines;
 }
 
 function generateShapeBlock() {
-  const vertexFn = usingCurves ? "curveVertex" : "vertex";
-  const lines = ["function drawShape() {", "  beginShape();"];
-  // with curves, the first/last points repeat as off-screen control points
-  if (usingCurves) lines.push(`  curveVertex(${pointAt(0)});  // control point`);
-  for (let i = 0; i < clickedPoints.length; i++) lines.push(`  ${vertexFn}(${pointAt(i)});`);
-  if (usingCurves) lines.push(`  curveVertex(${pointAt(clickedPoints.length - 1)});  // control point`);
-  lines.push("  endShape();", "}");
+  let lines = [];
+  lines.push("function drawShape() {");
+  lines.push("  beginShape();");
+
+  // with curves, the first and last points repeat as off-screen control points
+  if (usingCurves) {
+    lines.push("  curveVertex(" + pointAt(0) + ");  // control point");
+  }
+
+  for (let i = 0; i < clickedPoints.length; i++) {
+    if (usingCurves) {
+      lines.push("  curveVertex(" + pointAt(i) + ");");
+    } else {
+      lines.push("  vertex(" + pointAt(i) + ");");
+    }
+  }
+
+  if (usingCurves) {
+    let last = clickedPoints.length - 1;
+    lines.push("  curveVertex(" + pointAt(last) + ");  // control point");
+  }
+
+  lines.push("  endShape();");
+  lines.push("}");
   return lines;
 }
 
 function generateArrays() {
-  let xs = clickedPoints.map((p) => p.x);
-  let ys = clickedPoints.map((p) => p.y);
-  if (usingCurves && xs.length > 0) {
-    xs = [xs[0], ...xs, xs[xs.length - 1]];
-    ys = [ys[0], ...ys, ys[ys.length - 1]];
+  let xs = [];
+  let ys = [];
+
+  // (curves repeat the first and last points as control points)
+  if (usingCurves && clickedPoints.length > 0) {
+    xs.push(clickedPoints[0].x);
+    ys.push(clickedPoints[0].y);
   }
-  // padStart is plain JavaScript (a String method) — it lines the numbers up in columns.
-  const format = (nums) => nums.map((n) => String(n).padStart(3, "0")).join(", ");
-  return [`let x = [${format(xs)}];`, `let y = [${format(ys)}];`];
+  for (let i = 0; i < clickedPoints.length; i++) {
+    xs.push(clickedPoints[i].x);
+    ys.push(clickedPoints[i].y);
+  }
+  if (usingCurves && clickedPoints.length > 0) {
+    let last = clickedPoints.length - 1;
+    xs.push(clickedPoints[last].x);
+    ys.push(clickedPoints[last].y);
+  }
+
+  return ["let x = [" + numberList(xs) + "];", "let y = [" + numberList(ys) + "];"];
+}
+
+// Join numbers with commas, each padded to 3 digits so the columns line up.
+function numberList(nums) {
+  let out = "";
+  for (let i = 0; i < nums.length; i++) {
+    if (i > 0) out += ", ";
+    out += String(nums[i]).padStart(3, "0");
+  }
+  return out;
 }
 
 // ===== Small helpers ========================================================
