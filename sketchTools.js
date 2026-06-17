@@ -67,6 +67,11 @@ function enableSketchTools(mode = "lines") {
   toolsActive = true;
   sketchMode = mode;
   usingCurves = mode === "curves";
+  // describe() gives screen readers a text description of the canvas (a p5 accessibility
+  // feature). Students can call describe() with their own words to describe their art.
+  describe(
+    "An interactive sketch canvas. Click to place points; the matching p5.js code prints to the browser console."
+  );
   buildHud();
   updateConsole();
 }
@@ -172,9 +177,9 @@ function buildHud() {
   hud.style("box-sizing", "border-box");
   hud.style("max-width", "300px");
   hud.style("padding", "10px 12px");
-  hud.style("background", "rgba(20, 20, 28, 0.88)");
+  hud.style("background", "rgb(20, 20, 28)"); // opaque, so text contrast can't be eaten by the smear behind it
   hud.style("color", "#f0f0f0");
-  hud.style("font", "13px/1.45 system-ui, sans-serif");
+  hud.style("font", "0.85rem/1.45 system-ui, sans-serif"); // rem respects the reader's font-size setting
   hud.style("border-radius", "8px");
   hud.style("box-shadow", "0 2px 12px rgba(0, 0, 0, 0.35)");
   hud.style("z-index", "10");
@@ -198,9 +203,11 @@ function buildHud() {
   controls.parent(hud);
 
   fillPicker = createColorPicker("#ff8c42");
+  fillPicker.attribute("aria-label", "Fill color"); // accessible name for screen readers
   fillPicker.input(updateConsole); // live: snippet updates as the color changes
   fillNameInput = createInput("");
   fillNameInput.attribute("placeholder", "fill name");
+  fillNameInput.attribute("aria-label", "Name for the fill color"); // placeholder alone isn't a label
   fillNameInput.style("width", "92px");
   fillNameInput.input(updateConsole); // live snippet as you type
   fillNameInput.changed(() => onNameChanged("fill")); // on commit: clean up + ribbing
@@ -208,9 +215,11 @@ function buildHud() {
   noFillBox.changed(onNoFillToggled);
 
   strokePicker = createColorPicker("#1b1b3a");
+  strokePicker.attribute("aria-label", "Stroke color");
   strokePicker.input(updateConsole);
   strokeNameInput = createInput("");
   strokeNameInput.attribute("placeholder", "stroke name");
+  strokeNameInput.attribute("aria-label", "Name for the stroke color");
   strokeNameInput.style("width", "92px");
   strokeNameInput.input(updateConsole);
   strokeNameInput.changed(() => onNameChanged("stroke"));
@@ -218,6 +227,7 @@ function buildHud() {
   noStrokeBox.changed(onNoStrokeToggled);
 
   weightInput = createInput("1", "number");
+  weightInput.attribute("aria-label", "Stroke weight");
   weightInput.attribute("min", "1");
   weightInput.attribute("step", "1");
   weightInput.style("width", "60px");
