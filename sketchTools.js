@@ -51,13 +51,14 @@ function displayWelcomeText() {
 }
 
 // ===== The seams: sketch.js's p5 callbacks hand off to these =================
-function sketchToolsClicked() {
-  if (!toolsActive || mouseIsOffCanvas()) return;
-  // mouseButton is p5's "which button is down". LEFT clicks only.
-  if (mouseButton !== LEFT) return;
+function sketchToolsClicked(event) {
+  if (!toolsActive) return;
+  // Clicks that land on the HUD belong to the HUD (its pickers/buttons), not the canvas.
+  if (clickLandedOnHud(event)) return;
+  if (mouseIsOffCanvas() || mouseButton !== LEFT) return; // canvas, left button only
 
   clickedPoints.push({ x: round(mouseX), y: round(mouseY) });
-  if (hudVisible) hideHud(); // your first click clears the HUD out of the way
+  if (hudVisible) hideHud(); // your first canvas click tucks the HUD away
   updateConsole();
 }
 
@@ -391,6 +392,12 @@ function mouseIsOffCanvas() {
 function aTextFieldIsFocused() {
   const el = document.activeElement;
   return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
+}
+
+// Did this click land on the HUD panel or its controls? Then it's the HUD's click, not a
+// canvas click. (event.target + .contains are plain DOM — same seam idea as the key guard.)
+function clickLandedOnHud(event) {
+  return hud && event && event.target && hud.elt.contains(event.target);
 }
 
 // ===== HUD/control helpers ==================================================

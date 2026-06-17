@@ -11,9 +11,9 @@ function setup() {
   noLoop(); // the canvas sits still for now — DELETE this line if your sketch animates.
 }
 
-function mouseClicked() {
-  loop();               // wake the sketch so the preview follows your mouse
-  sketchToolsClicked(); // record the click — it's not magic, it's sketchTools.js
+function mouseClicked(event) {
+  loop();                    // wake the sketch so the preview follows your mouse
+  sketchToolsClicked(event); // record the click — it's not magic, it's sketchTools.js
 }
 
 function keyPressed() {
