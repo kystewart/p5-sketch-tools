@@ -21,6 +21,9 @@ let usingCurves = false; // connect points with curveVertex instead of vertex?
 let showArrays = false; // print x[]/y[] arrays instead of a shape? (great for gradients)
 let toolsActive = false; // is the kit turned on? (false = everything below no-ops)
 
+let hud; // the HUD panel (a p5 DOM element), built on demand
+let hudVisible = false; // is the HUD showing right now?
+
 // Where students see "open your console". The hotkey varies by browser/OS, so it lives
 // in ONE place you can edit. (Firefox: this opens the Browser Console.)
 const CONSOLE_HOTKEY = "Ctrl/Cmd + Shift + J";
@@ -30,6 +33,7 @@ function enableSketchTools(mode = "lines") {
   toolsActive = true;
   sketchMode = mode;
   usingCurves = mode === "curves";
+  buildHud();
   updateConsole();
 }
 
@@ -48,6 +52,7 @@ function sketchToolsClicked() {
   if (mouseButton !== LEFT) return;
 
   clickedPoints.push({ x: round(mouseX), y: round(mouseY) });
+  if (hudVisible) hideHud(); // your first click clears the HUD out of the way
   updateConsole();
 }
 
@@ -65,6 +70,9 @@ function sketchToolsKey() {
     clickedPoints = [];
   } else if (key === "a" || key === "A") {
     showArrays = !showArrays;
+  } else if (key === "h" || key === "H") {
+    toggleHud();
+    return; // toggling the HUD doesn't change the printed code
   } else {
     return; // ignore other keys (so you can keep typing elsewhere)
   }
@@ -112,6 +120,66 @@ function drawSketchTools() {
     circle(p.x, p.y, 5);
   }
   pop();
+}
+
+// ===== The HUD (tips + controls, floating over the canvas) ==================
+// The HUD is built from p5's DOM widgets. It floats ABOVE the canvas — and that layering
+// is itself a little superuser lesson (the controls live in the page, not in your
+// drawing). It shows by default so it's obvious the tools are on (turn them off before you
+// submit!), and it hides on your first click or when you press h.
+function buildHud() {
+  if (hud) return; // only ever build it once
+
+  hud = createDiv();
+  hud.style("position", "absolute");
+  hud.style("box-sizing", "border-box");
+  hud.style("max-width", "300px");
+  hud.style("padding", "10px 12px");
+  hud.style("background", "rgba(20, 20, 28, 0.88)");
+  hud.style("color", "#f0f0f0");
+  hud.style("font", "13px/1.45 system-ui, sans-serif");
+  hud.style("border-radius", "8px");
+  hud.style("box-shadow", "0 2px 12px rgba(0, 0, 0, 0.35)");
+  hud.style("z-index", "10");
+
+  createDiv(
+    "<b>Sketch tools are ON.</b> (turn them off before you submit!)<br>" +
+      "Open your dev tools (<code>" + CONSOLE_HOTKEY + "</code>, or Tools ▸ Browser Tools) to see your code.<br><br>" +
+      "<b>keys:</b> c line/curve · Backspace undo · x clear · a arrays · h hide/show<br><br>" +
+      "Tracing polygons &amp; curves here is great. For circles &amp; rectangles, use " +
+      "<code>circle()</code> / <code>rect()</code> instead — they look way better.<br><br>" +
+      "<i>Notice there's no background() yet — that's why it smears. Add one in draw() " +
+      "when you're done playing.</i>"
+  ).parent(hud);
+
+  showHud();
+}
+
+// Put the HUD over the canvas's top-left corner. (getBoundingClientRect is plain DOM:
+// figuring out where something sits on screen is a browser job, not a p5 one.)
+function positionHud() {
+  const canvas = select("canvas");
+  if (!canvas || !hud) return;
+  const box = canvas.elt.getBoundingClientRect();
+  hud.position(box.left + window.scrollX + 12, box.top + window.scrollY + 12);
+}
+
+function showHud() {
+  if (!hud) return;
+  positionHud();
+  hud.show();
+  hudVisible = true;
+}
+
+function hideHud() {
+  if (!hud) return;
+  hud.hide();
+  hudVisible = false;
+}
+
+function toggleHud() {
+  if (hudVisible) hideHud();
+  else showHud();
 }
 
 // ===== Console output =======================================================
