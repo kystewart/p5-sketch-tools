@@ -518,13 +518,15 @@ function onNameChanged(which) {
     alert("pleaseUseCamelCaseForAllVariableNamesSinceSpacesAreIllegal\n\n→ using: " + clean);
   }
 
-  // louder ribbing: only the bare kindergarten colors, not fancy ones like lightSkyBlue
-  const channelOff = which === "fill" ? noFillBox.checked() : noStrokeBox.checked();
-  if (!channelOff && isKindergartenColor(clean)) {
-    alert('"' + clean + '"? That\'s a kindergarten color. ' + random(kindergartenZingers));
-  }
-
   updateConsole();
+
+  // If they picked a common color, let them in on a secret: the fancier names. Printed to
+  // the console (gentle, never a blocking pop-up) and only on commit so it isn't spammy.
+  // The joke is on the silly color NAMES, never on the student's choice.
+  const channelOff = which === "fill" ? noFillBox.checked() : noStrokeBox.checked();
+  if (!channelOff && isCommonColor(clean)) {
+    console.log("🎨 " + random(colorTips));
+  }
 }
 
 // Checking noFill / noStroke hides that color's picker + name box (they're irrelevant);
@@ -551,8 +553,8 @@ function onNoStrokeToggled() {
   updateConsole();
 }
 
-// Gentle ribbing printed under the snippet. (The louder kindergarten-color alert lives in
-// onNameChanged; this just whispers the same-name tip.)
+// Gentle tip printed under the snippet. (The common-color "secret" wink lives in
+// onNameChanged; this just whispers the same-name suggestion.)
 function maybeNudge() {
   if (!fillPicker) return; // HUD not built (tools off)
 
@@ -563,25 +565,25 @@ function maybeNudge() {
   }
 }
 
-// Each ribbing ends with a random one of these. Find where they're used, and figure out
-// HOW one gets picked — that's the sneaky lesson hiding in here. 😏
-const kindergartenZingers = [
-  "There's a whole rainbow out there — go explore!",
-  "Classic! Bet you can find a fancier one.",
-  "Nice and bold. Try a sneaky one next?",
-  "Great start — the picker has thousands more.",
-  "Ooh, a crowd favorite. Feeling adventurous?",
-  "Solid pick! Now find one nobody else will use.",
-  "Love it. Dare to get a little weird?",
-  "Try something fancy like cornflowerBlue and see. 👀",
+// One of these is shown at random when you pick a common color — a "you and me are in on
+// a secret" wink that points at the fancier names. Find where they're used and figure out
+// HOW one gets picked; that's the sneaky lesson hiding in here. 😏
+const colorTips = [
+  "Psst — between us, 'papayawhip' is a real color. Go try it. 🤫",
+  "Secret: there are ~140 named colors. 'cornflowerBlue' is our little favorite.",
+  "Lean in… the cool kids use 'gainsboro'. You didn't hear it from me.",
+  "Want in on something? 'mediumAquamarine' is real and ridiculous to say aloud.",
+  "Between you and me, 'tomato' is an official color. Wild, right?",
+  "Quietly now: type a weird name like 'goldenrod' and watch it just work. 🤫",
+  "You look like someone who can keep a secret — the color list is HUGE.",
 ];
 
-// The bare kindergarten colors (ROYGBIV + the usual suspects). Case-insensitive and an
-// EXACT match — so fancy names like lightSkyBlue or dodgerBlue sail through unmocked.
-function isKindergartenColor(name) {
-  const kindergarten = [
+// The everyday color words (ROYGBIV + the usual suspects). Case-insensitive and an EXACT
+// match — so fancy names like lightSkyBlue or dodgerBlue don't count as "common."
+function isCommonColor(name) {
+  const common = [
     "red", "orange", "yellow", "green", "blue", "indigo", "violet",
     "purple", "pink", "brown", "black", "white", "gray", "grey",
   ];
-  return kindergarten.includes(name.toLowerCase());
+  return common.includes(name.toLowerCase());
 }
