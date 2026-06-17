@@ -1,6 +1,7 @@
 /*
  * sketchTools.js
  * Copyright (c) 2026 Kyle Stewart — MIT License
+ * Home: https://github.com/kystewart/p5-sketch-tools
  *
  * Free for anyone who also finds it useful — use it, remix it, teach with it.
  * If you like it and use it, please buy me a coffee (or a Ferrari, if your budget

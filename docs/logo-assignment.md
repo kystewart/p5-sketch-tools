@@ -65,3 +65,6 @@ want to carry with you and remind yourself of as you go.
 - [ ] I turned the **sketch tools off** before submitting.
 
 Have fun with this one — it's the assignment where looking like *you* is the assignment.
+
+---
+*Made with the [p5 Sketch Tools](https://github.com/kystewart/p5-sketch-tools).*

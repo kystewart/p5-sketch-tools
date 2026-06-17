@@ -1,5 +1,7 @@
 # CLAUDE.md — p5.js Sketch Tools
 
+**Repo:** https://github.com/kystewart/p5-sketch-tools
+
 Guidance for anyone (human or AI) working on this project. Read this first.
 
 ## What this is
