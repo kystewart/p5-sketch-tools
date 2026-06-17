@@ -322,13 +322,13 @@ function generateCode() {
   if (count === 3 && !usingCurves) {
     return withStyle(true, true, ["triangle(" + pointAt(0) + ", " + pointAt(1) + ", " + pointAt(2) + ");"]);
   }
-  return withStyle(true, true, generateShapeBlock());
+  return generateShapeBlock(); // a multi-point shape is a self-contained function
 }
 
-// Add the fill/stroke/strokeWeight lines (using your named colors) above a shape.
+// The style lines for a shape: named color variables + fill/stroke/strokeWeight.
 // usesFill / usesStroke say which styles the shape cares about (a line has no fill).
-function withStyle(usesFill, usesStroke, shapeLines) {
-  if (!fillPicker || !strokePicker) return shapeLines; // HUD not built (tools off)
+function styleLines(usesFill, usesStroke) {
+  if (!fillPicker || !strokePicker) return []; // HUD not built (tools off)
 
   let fillName = colorVarName("fill");
   let strokeName = colorVarName("stroke");
@@ -355,19 +355,32 @@ function withStyle(usesFill, usesStroke, shapeLines) {
       lines.push("strokeWeight(" + currentWeight() + ");");
     }
   }
+  return lines;
+}
 
+// Put the style ABOVE an inline shape (line, triangle, dots…). These paste into draw().
+function withStyle(usesFill, usesStroke, shapeLines) {
+  let lines = styleLines(usesFill, usesStroke);
   if (lines.length > 0) lines.push(""); // blank line before the shape
-
-  // finally, add the shape itself
   for (let i = 0; i < shapeLines.length; i++) {
     lines.push(shapeLines[i]);
   }
   return lines;
 }
 
+// A multi-point shape becomes a self-contained function: the colors and style live INSIDE
+// the braces, so nothing leaks into your sketch's scope when you paste it.
 function generateShapeBlock() {
   let lines = [];
-  lines.push("function drawShape() {");
+  lines.push("function drawShape() {  // rename me to match your picture, e.g. flowerPetals");
+
+  // style goes inside the function (indented) so the named colors stay local
+  let style = styleLines(true, true);
+  for (let i = 0; i < style.length; i++) {
+    lines.push("  " + style[i]);
+  }
+  if (style.length > 0) lines.push("");
+
   lines.push("  beginShape();");
 
   // with curves, the first and last points repeat as off-screen control points
